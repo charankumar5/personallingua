@@ -1,4 +1,4 @@
-import { Message, SendMessageResponse, Language } from '../types';
+import { Message, SendMessageResponse, Language, AiModel } from '../types';
 
 const API_BASE = '/api';
 
@@ -23,11 +23,11 @@ export const fetchHistory = async (): Promise<Message[]> => {
   }
 };
 
-export const sendMessageToApi = async (text: string, language: Language): Promise<SendMessageResponse> => {
+export const sendMessageToApi = async (text: string, language: Language, model: AiModel): Promise<SendMessageResponse> => {
   const res = await fetch(`${API_BASE}/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message: text, language }),
+    body: JSON.stringify({ message: text, language, model }),
   });
   
   if (!res.ok) {

@@ -1,3 +1,26 @@
 {
-  "messages": []
+  "messages": [
+    {
+      "role": "user",
+      "text": "emo",
+      "timestamp": "2025-12-12T07:52:42.775Z"
+    },
+    {
+      "role": "model",
+      "text": "Hello! That's an interesting greeting. Are you perhaps feeling a bit emotional, or is that just a shortened way of saying hello? How can I help you with your English today?",
+      "translation": "¡Hola! Ese es un saludo interesante. ¿Quizás te sientes un poco emocional, o es solo una forma abreviada de decir hola? ¿Cómo puedo ayudarte con tu inglés hoy?",
+      "timestamp": "2025-12-12T07:52:43.733Z"
+    },
+    {
+      "role": "user",
+      "text": "hallo",
+      "timestamp": "2025-12-12T07:53:30.125Z"
+    },
+    {
+      "role": "model",
+      "text": "Hallo! Wie geht es dir heute?",
+      "translation": "Hello! How are you today?",
+      "timestamp": "2025-12-12T07:53:30.739Z"
+    }
+  ]
 }

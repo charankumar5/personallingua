@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Message, Language } from '../types';
+import { Message, Language, AiModel } from '../types';
 import { checkHealth, fetchHistory, sendMessageToApi, resetHistory } from '../services/api';
 import { startListening, stopListening, speakText } from '../services/audioService';
 
@@ -9,6 +9,7 @@ export const useTutor = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [language, setLanguage] = useState<Language>('en');
+  const [model, setModel] = useState<AiModel>('gemini-2.5-flash');
   const [interimInput, setInterimInput] = useState('');
   const [autoSpeak, setAutoSpeak] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -84,7 +85,7 @@ export const useTutor = () => {
     setMessages(prev => [...prev, userMsg]);
 
     try {
-      const response = await sendMessageToApi(text, language);
+      const response = await sendMessageToApi(text, language, model);
       setMessages(response.history);
 
       // Auto-speak logic
@@ -105,19 +106,19 @@ export const useTutor = () => {
         const seconds = parseFloat(retryMatch[1]);
         const waitTime = Math.ceil(seconds) + 1; // Add 1s buffer
         setRateLimitEndTime(Date.now() + (waitTime * 1000));
-        setError(`Rate limit exceeded. Pausing for ${waitTime} seconds.`);
+        setError(`Rate limit exceeded for ${model}. Pausing for ${waitTime} seconds.`);
       } else if (errorMsg.includes("429") || errorMsg.includes("quota")) {
         // Default fallback if time not parsed
         const defaultWait = 30;
         setRateLimitEndTime(Date.now() + (defaultWait * 1000));
-        setError(`Rate limit exceeded. Pausing for ${defaultWait} seconds.`);
+        setError(`Rate limit exceeded for ${model}. Pausing for ${defaultWait} seconds.`);
       } else {
         setError(errorMsg);
       }
     } finally {
       setIsLoading(false);
     }
-  }, [language, rateLimitEndTime]);
+  }, [language, model, rateLimitEndTime]);
 
   const toggleRecording = useCallback(async () => {
     if (cooldownRemaining > 0) return; // Prevent recording during cooldown
@@ -172,6 +173,14 @@ export const useTutor = () => {
   const switchLanguage = (lang: Language) => {
     setLanguage(lang);
   };
+  
+  const switchModel = (newModel: AiModel) => {
+      setModel(newModel);
+      // Reset cooldown if switching models, as they might have different buckets
+      setRateLimitEndTime(null);
+      setCooldownRemaining(0);
+      setError(null);
+  }
 
   const clearHistory = async () => {
     if(confirm("Are you sure you want to clear the chat history?")) {
@@ -179,6 +188,7 @@ export const useTutor = () => {
             await resetHistory();
             setMessages([]);
             setRateLimitEndTime(null); // Clear cooldown on reset
+            setError(null);
         } catch (e) {
             setError("Failed to clear history.");
         }
@@ -196,12 +206,14 @@ export const useTutor = () => {
     isConnected,
     isLoading,
     language,
+    model,
     autoSpeak,
     error,
     cooldownRemaining,
     toggleRecording,
     sendMessage,
     switchLanguage,
+    switchModel,
     clearHistory,
     toggleAutoSpeak
   };

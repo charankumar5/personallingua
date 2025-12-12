@@ -3,8 +3,8 @@ import { useTutor } from './hooks/useTutor';
 import { ChatBubble } from './components/ChatBubble';
 import { InputControls } from './components/InputControls';
 import { StatusPanel } from './components/StatusPanel';
-import { Message } from './types';
-import { BookOpen, Languages, Menu, AlertCircle } from 'lucide-react';
+import { BookOpen, Languages, Menu, AlertCircle, Sparkles, Cpu } from 'lucide-react';
+import { AiModel } from './types';
 
 const App: React.FC = () => {
   const { 
@@ -14,12 +14,14 @@ const App: React.FC = () => {
     isConnected, 
     isLoading,
     language,
+    model,
     autoSpeak,
     error,
     cooldownRemaining,
     toggleRecording,
     sendMessage,
     switchLanguage,
+    switchModel,
     clearHistory,
     toggleAutoSpeak
   } = useTutor();
@@ -50,7 +52,12 @@ const App: React.FC = () => {
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-6">
-          <StatusPanel isConnected={isConnected} language={language} />
+          <StatusPanel 
+            isConnected={isConnected} 
+            language={language} 
+            currentModel={model}
+            onModelChange={switchModel}
+          />
           
           <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
              <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
@@ -77,19 +84,53 @@ const App: React.FC = () => {
 
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col h-full relative w-full">
-        {/* Mobile Header */}
-        <div className="md:hidden h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4">
-          <div className="flex items-center gap-2 font-bold text-slate-800">
-             <BookOpen size={20} className="text-blue-600" />
-             LinguaLocal
+        
+        {/* Unified Header (Mobile & Desktop) */}
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 shadow-sm z-10">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+              className="p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg md:hidden"
+            >
+              <Menu size={24} />
+            </button>
+            
+            <div className="flex flex-col">
+              <span className="font-bold text-slate-800 md:hidden flex items-center gap-2">
+                 <BookOpen size={18} className="text-blue-600" />
+                 LinguaLocal
+              </span>
+              <span className="hidden md:flex items-center gap-2 font-semibold text-slate-700">
+                <Sparkles size={16} className="text-amber-500" />
+                AI Tutor Chat
+              </span>
+            </div>
           </div>
-          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 text-slate-600">
-            <Menu size={24} />
-          </button>
-        </div>
+
+          {/* Persistent Model Selector */}
+          <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-lg border border-slate-200">
+             <div className="hidden sm:flex items-center gap-1 px-2 text-slate-500">
+                <Cpu size={14} />
+                <span className="text-xs font-medium">Model:</span>
+             </div>
+             <select 
+                value={model}
+                onChange={(e) => switchModel(e.target.value as AiModel)}
+                className="bg-transparent text-xs sm:text-sm font-semibold text-slate-700 outline-none cursor-pointer py-1 px-1 max-w-[140px] sm:max-w-none truncate"
+                title="Select AI Model"
+              >
+                <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                <option value="gemini-flash-lite-latest">Gemini Flash Lite</option>
+                <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash Exp</option>
+                <option value="gemini-2.0-pro-exp-02-05">Gemini 2.0 Pro Exp</option>
+                <option value="gemini-2.0-flash-thinking-exp-01-21">Gemini 2.0 Thinking</option>
+                <option value="gemini-3-pro-preview">Gemini 3.0 Pro</option>
+              </select>
+          </div>
+        </header>
 
         {/* Chat Scroll Area */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 bg-slate-50/50" onClick={() => setIsSidebarOpen(false)}>
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 bg-slate-50/50 scroll-smooth" onClick={() => setIsSidebarOpen(false)}>
           {/* Error Banner */}
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl flex items-center gap-3 animate-pulse">
@@ -102,6 +143,7 @@ const App: React.FC = () => {
              <div className="flex flex-col items-center justify-center h-full text-slate-400 opacity-60">
                 <BookOpen size={64} className="mb-4" />
                 <p>Start chatting to begin your lesson.</p>
+                <p className="text-xs mt-2">Current Model: {model}</p>
              </div>
           )}
           

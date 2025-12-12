@@ -51,11 +51,14 @@ app.delete('/history', async (req, res) => {
 });
 
 app.post('/chat', async (req, res) => {
-  const { message, language } = req.body;
+  const { message, language, model } = req.body;
   
   if (!message) {
     return res.status(400).json({ error: "Message required" });
   }
+
+  // Default to 2.5 Flash if no model provided or if invalid
+  const targetModel = model || 'gemini-2.5-flash';
 
   const historyData = await getHistory();
   
@@ -111,7 +114,7 @@ app.post('/chat', async (req, res) => {
     }
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: targetModel,
       contents: sanitizedContents,
       config: {
         systemInstruction: systemInstruction,
