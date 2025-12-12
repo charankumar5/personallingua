@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - API_KEY=${API_KEY}
+    volumes:
+      - ./data:/app/../data
+    networks:
+      - lingua_net
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://backend:3001
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - lingua_net
+
+networks:
+  lingua_net:
+    driver: bridge

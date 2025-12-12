@@ -1,0 +1,7 @@
+{
+  "name": "LinguaLocal",
+  "description": "A privacy-first, Dockerized AI language tutoring application bridging React and Gemini 2.5 Flash.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
